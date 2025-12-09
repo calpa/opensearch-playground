@@ -143,11 +143,6 @@ PUT amazon_qa_software
 From the project root, after `qa_software_bulk.ndjson` has been generated:
 
 ```bash
-# If security is disabled (HTTP)
-curl -H "Content-Type: application/x-ndjson" \
-  -X POST "http://localhost:9200/_bulk?pretty" \
-  --data-binary "@qa_software_bulk.ndjson"
-
 # If security + HTTPS is enabled (typical for this repo)
 curl -k -u admin:'YOUR_PASSWORD' \
   -H "Content-Type: application/x-ndjson" \
@@ -162,6 +157,72 @@ GET amazon_qa_software/_search
 {
   "size": 3,
   "query": { "match_all": {} }
+}
+```
+
+Response:
+
+```json
+{
+  "took": 287,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 10000,
+      "relation": "gte"
+    },
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "amazon_qa_software",
+        "_id": "YEm6AJsB1kJWL1OHtx9w",
+        "_score": 1,
+        "_source": {
+          "asin": "0439381673",
+          "question": "I have Windows 8, Will this work on my computer?",
+          "answer": "Yes",
+          "questionType": "yes/no",
+          "answerType": "Y",
+          "answerTime": "Aug 11, 2013",
+          "unixTime": 1376204400
+        }
+      },
+      {
+        "_index": "amazon_qa_software",
+        "_id": "YUm6AJsB1kJWL1OHtx9w",
+        "_score": 1,
+        "_source": {
+          "asin": "0439381673",
+          "question": "what is it about?",
+          "answer": "Kinda like the way they did with the Wagon trains going west..you have to buy food and choose your people etc..it's a fun game and has been around for years. My grown kids played the first games, then newer came along with grandkids playing...It's a fun game for the whole family to enjoy..so saddle up and try it out..if you like the Old West. Look out for the rivers and such...........Good Luck",
+          "questionType": "open-ended",
+          "answerType": null,
+          "answerTime": "Oct 19, 2014",
+          "unixTime": 1413702000
+        }
+      },
+      {
+        "_index": "amazon_qa_software",
+        "_id": "Ykm6AJsB1kJWL1OHtx9w",
+        "_score": 1,
+        "_source": {
+          "asin": "0439381673",
+          "question": "It says above platform Mac, but I see in the questions that it does not for Mac Book Pro. What about regular Mac desktop??",
+          "answer": "I used it with a pc. So, I have no idea. I hope it works for you. I really liked this as did the children in my class. We made it all the way to Ft. Vancouver.",
+          "questionType": "open-ended",
+          "answerType": null,
+          "answerTime": "Aug 11, 2014",
+          "unixTime": 1407740400
+        }
+      }
+    ]
+  }
 }
 ```
 
