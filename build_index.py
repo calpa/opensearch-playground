@@ -1,5 +1,7 @@
 import logging
+import os
 from opensearchpy import OpenSearch, helpers
+from opensearchpy.exceptions import AuthenticationException
 from sentence_transformers import SentenceTransformer
 
 logging.basicConfig(
@@ -9,7 +11,13 @@ logging.basicConfig(
 
 # 1. 連到 OpenSearch
 OPENSEARCH_USER = "admin"
-OPENSEARCH_PASSWORD = "CHANGE_ME"
+OPENSEARCH_PASSWORD = os.getenv("OPENSEARCH_INITIAL_ADMIN_PASSWORD")
+
+if not OPENSEARCH_PASSWORD:
+    raise RuntimeError(
+        "OPENSEARCH_INITIAL_ADMIN_PASSWORD is not set. "
+        "Please export it in your shell or define it in the .env file before running build_index.py."
+    )
 
 logging.info("Connecting to OpenSearch at localhost:9200 as user '%s'", OPENSEARCH_USER)
 client = OpenSearch(
@@ -19,7 +27,15 @@ client = OpenSearch(
     use_ssl=True,
     verify_certs=False,  # OK for self-signed local dev
 )
-logging.info("Connected to OpenSearch")
+
+try:
+    client.info()
+    logging.info("Connected to OpenSearch and authentication succeeded")
+except AuthenticationException as e:
+    raise RuntimeError(
+        "Failed to authenticate to OpenSearch. "
+        "Check that OPENSEARCH_INITIAL_ADMIN_PASSWORD matches the admin password configured in the cluster."
+    ) from e
 
 # 2. 載入 embedding 模型
 logging.info("Loading SentenceTransformer model: sentence-transformers/all-MiniLM-L6-v2")
@@ -41,9 +57,12 @@ def gen_docs():
     count = 0
     for doc in page:
         source = doc["_source"]
-        text = source.get("question", "") or ""
+        question = source.get("question", "") or ""
+        answer = source.get("answer", "") or ""
+        text = (question + " " + answer).strip()
         if not text:
-            logging.debug("Document %s has empty question field, skipping embedding", doc.get("_id"))
+            logging.debug("Document %s has empty question and answer fields, skipping embedding", doc.get("_id"))
+            continue
         emb = model.encode(text, show_progress_bar=False)
         count += 1
         if count % 100 == 0:
@@ -53,8 +72,8 @@ def gen_docs():
             "_id": doc["_id"],
             "_source": {
                 "asin": source.get("asin"),
-                "question": text,
-                "answer": source.get("answer"),
+                "question": question,
+                "answer": answer,
                 "question_vector": emb.tolist()
             }
         }

@@ -263,6 +263,12 @@ PUT amazon_qa_software_vec
 }
 ```
 
+In this project, the `question_vector` embedding is computed from the **concatenation of the question and answer text**:
+
+- `text_for_embedding = question + " " + answer`
+
+This means each vector captures both the **user question** and the corresponding **answer content** when performing semantic search.
+
 ### 5.2 Populate the vector index (Python)
 
 - **Script:** `build_index.py`
@@ -293,6 +299,9 @@ PUT amazon_qa_software_vec
   # From the project root (this repository)
   # Activate existing virtualenv (already created as .venv)
   source .venv/bin/activate
+
+  # Load environment variables from .env (including OPENSEARCH_INITIAL_ADMIN_PASSWORD)
+  export $(grep -v '^#' .env | xargs)
 
   # Or call the venv python directly
   ./.venv/bin/python build_index.py
