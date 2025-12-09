@@ -90,7 +90,20 @@ This project assumes a **local OpenSearch cluster** (with security enabled) and 
   - Dashboards: `https://localhost:5601` (depending on compose settings)
 - **Auth (local dev):**
   - Username: `admin`
-  - Password: set via environment (example in this project uses a hard‑coded password in local scripts; in real use, prefer env vars).
+  - Password: configured via environment variables.
+
+### 3.1 Admin password via `.env`
+
+The Docker demo expects the **initial admin password** to be provided via a `.env` file that is loaded by `docker-compose.yml`.
+
+- **Location:** create a `.env` file in the **same directory** as `docker-compose.yml`.
+- **Content:** add at least the following line:
+
+  ```bash
+  OPENSEARCH_INITIAL_ADMIN_PASSWORD=YourStrongPassw0rd!
+  ```
+
+The value of `OPENSEARCH_INITIAL_ADMIN_PASSWORD` must follow OpenSearch's password policy, e.g. **at least 8 characters**, including **uppercase**, **lowercase**, **digits**, and **special characters**.
 
 > Note: The Python client in this repo connects to `https://localhost:9200` with `verify_certs=False` for local, self‑signed TLS. This is fine for a playground but should not be used in production.
 
@@ -193,6 +206,7 @@ PUT amazon_qa_software_vec
 
 - **Script:** `build_index.py`
 - **Behavior (high level):**
+
   1. Connects to OpenSearch (`https://localhost:9200`, basic auth as `admin`).
   2. Loads the `all-MiniLM-L6-v2` SentenceTransformer model.
   3. Scrolls through all docs in `amazon_qa_software`.
@@ -208,6 +222,7 @@ PUT amazon_qa_software_vec
   6. Logs progress with the standard `logging` module.
 
 - **Auth & SSL:**
+
   - Uses username/password for the local secured cluster.
   - Uses `scheme="https"`, `use_ssl=True`, `verify_certs=False` for local development.
 
