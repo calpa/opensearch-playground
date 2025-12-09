@@ -423,5 +423,34 @@ This README is written so that a future AI assistant (or you) can reconstruct th
 3. Create and populate `amazon_qa_software`.
 4. Build vector index with `build_index.py`.
 5. Run semantic queries with `ask.py`.
+6. Explore results interactively with the Gradio app `gradio_app.py`.
 
 From there, you can extend the project into a full local RAG system on top of the Amazon QA dataset.
+
+---
+
+## 10. Gradio UI (`gradio_app.py`)
+
+This repo includes a small Gradio app that lets you type questions and see the top‑K most similar Q&A pairs from OpenSearch.
+
+- **Script:** `gradio_app.py`
+- **What it does:**
+  - Connects to the same secured OpenSearch cluster using env vars.
+  - Loads the `all-MiniLM-L6-v2` SentenceTransformer model.
+  - Encodes your question to a vector.
+  - Runs a kNN query on `question_vector` in `amazon_qa_software_vec`.
+  - Displays the retrieved Q&A pairs and scores in a simple web UI.
+
+### 10.1 How to run the Gradio app
+
+```bash
+# From the project root
+source .venv/bin/activate
+
+# Load environment variables from .env (including OPENSEARCH_INITIAL_ADMIN_PASSWORD)
+export $(grep -v '^#' .env | xargs)
+
+python gradio_app.py
+```
+
+Gradio will print a `Local URL` (and possibly a `Public URL`). Open the local URL in your browser, type a question (for example `Is that windows 8 good for gaming?`), and you should see the matching Q&A pairs and scores coming back from OpenSearch.
